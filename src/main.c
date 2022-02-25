@@ -7,8 +7,8 @@
 #define WIDTH 800
 #define HEIGHT 800
 
-#define PARTICLE_NUM 15 
-#define TARGET_FRAME_TIME 60
+#define PARTICLE_NUM 1 
+#define TARGET_FRAME_TIME 30
 
 int game_is_running = FALSE;
 int last_frame_time;
@@ -23,7 +23,7 @@ typedef struct vector {
     float y;
 } vector;
 
-typedef struct partice {
+typedef struct particle {
     vector position;
     vector velocity;
     vector size;
@@ -31,6 +31,13 @@ typedef struct partice {
 } Particle;
 
 Particle particles[PARTICLE_NUM];
+
+// take a particle and return its force as a vector
+// force = mass * acceleration (the acceleration is just earth's gravitational acceleration) 
+// not negative because even though particles are moving downwards, sdl y coordinates increase going down
+vector CalculateForce(Particle* particle) {
+    return (vector) {0, particle->mass * 9.81};
+}
 
 int initiliaze_window(void) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -77,9 +84,11 @@ void process_input() {
 
 void setup() {
     for(int i = 0; i < PARTICLE_NUM; i++) {
-        // printf("cycle: %d", i);
-        particles[i].position = (vector) {20 + i * 20, 20 + i * 20};
-        particles[i].size = (vector) {20, 20};
+        Particle* particle = &particles[i];
+
+        particle->position = (vector) {20 + i * 20, 20 + i * 20};
+        particle->size = (vector) {20, 20};
+        particle->mass = 1;
     }
 }
 
@@ -104,6 +113,16 @@ void render() {
         // we need a pointer so that variable is continuos 
         Particle* particle = &particles[i];
 
+        vector force = CalculateForce(particle);
+        // rearrange f = ma by dividing by m so: f/m = a
+        vector acceleration = (vector) {force.x / particle->mass, force.y / particle->mass};
+
+        particle->velocity.x += acceleration.x;
+        particle->velocity.y += acceleration.y;
+
+        particle->position.x += particle->velocity.x * delta_time;
+        particle->position.y += particle->velocity.y * delta_time;
+        
         // draw rectangle
         SDL_Rect particle_rect = {
                 particle->position.x,   // -> is the same as . (eg particle.position) but for pointers 
@@ -112,6 +131,7 @@ void render() {
                 particle->size.y
         };
 
+        printf("%f\n", particle->position.y);
         SDL_RenderFillRect(renderer, &particle_rect);
     };
     
