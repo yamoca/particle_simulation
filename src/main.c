@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
-#include "constants.h"
+
+#define FALSE 0
+#define TRUE 1
+
+#define WIDTH 800
+#define HEIGHT 800
+
+#define PARTICLE_NUM 1
+#define TARGET_FRAME_TIME 60
 
 int game_is_running = FALSE;
 int last_frame_time;
@@ -9,12 +17,20 @@ float delta_time;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
-struct ball {
+// makes a vector struct so we can easily reference points in 2d space
+typedef struct vector {
     float x;
     float y;
-    float width;
-    float height;
-} ball;
+} vector;
+
+typedef struct partice {
+    vector position;
+    vector velocity;
+    vector size;
+    float mass;
+} particle;
+
+particle particles[PARTICLE_NUM];
 
 int initiliaze_window(void) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -60,38 +76,37 @@ void process_input() {
 }
 
 void setup() {
-    ball.x = 20;
-    ball.y = 20;
-    ball.width = 15;
-    ball.height = 15;
+    for(int i = 0; i < PARTICLE_NUM; i++) {
+        printf("cycle: %d", i);
+        particles[i].position = (vector) {20, 20};
+        particles[i].size = (vector) {20, 20};
+    }
 }
 
 void update() {
     // timestep logic
     while(!SDL_TICKS_PASSED(SDL_GetTicks(), last_frame_time + TARGET_FRAME_TIME)); // sleep until propper time has passed
-
     delta_time = (SDL_GetTicks() - last_frame_time) / 1000.0f;
-
     last_frame_time = SDL_GetTicks();
-
-    ball.x += 50 * delta_time;
-    ball.y += 50 * delta_time;
 }
 
 void render() {
+    // draw a black background
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
     // draw rectangle
-    SDL_Rect ball_rect = {
-        (int)ball.x,
-        (int)ball.y,
-        (int)ball.width,
-        (int)ball.height
+    SDL_Rect particle_rect = {
+        particles[PARTICLE_NUM-1].position.x,
+        particles[PARTICLE_NUM-1].position.y,
+        particles[PARTICLE_NUM-1].size.x,
+        particles[PARTICLE_NUM-1].size.y
     };
     
+
+    // render
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, &ball_rect);
+    SDL_RenderFillRect(renderer, &particle_rect);
     
     // must swap buffer as sdl uses double buffering
     SDL_RenderPresent(renderer);
@@ -105,10 +120,8 @@ void deconstruct() {
 }
 
 int main(int argc, char *argv[]) {
-    game_is_running = initiliaze_window();
-    
+    game_is_running = initiliaze_window(); 
     setup();
-
     while(game_is_running) {
         process_input();
         update();
@@ -116,7 +129,7 @@ int main(int argc, char *argv[]) {
     }
 
     deconstruct();
-
     return 0;
 }
+
 
