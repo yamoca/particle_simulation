@@ -7,7 +7,7 @@
 #define WIDTH 800
 #define HEIGHT 800
 
-#define PARTICLE_NUM 3 
+#define PARTICLE_NUM 15 
 #define TARGET_FRAME_TIME 60
 
 int game_is_running = FALSE;
@@ -78,8 +78,7 @@ void process_input() {
 void setup() {
     for(int i = 0; i < PARTICLE_NUM; i++) {
         // printf("cycle: %d", i);
-        particles[i].position = (vector) {20 + i * 10, 20 + i * 10};
-        printf("x: %f", particles[i].position.x);
+        particles[i].position = (vector) {20 + i * 20, 20 + i * 20};
         particles[i].size = (vector) {20, 20};
     }
 }
@@ -112,8 +111,6 @@ void render() {
                 particle->size.x,
                 particle->size.y
         };
-
-        printf("pos: %i", particle_rect.x);
 
         SDL_RenderFillRect(renderer, &particle_rect);
     };
