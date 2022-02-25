@@ -7,7 +7,7 @@
 #define WIDTH 800
 #define HEIGHT 800
 
-#define PARTICLE_NUM 1
+#define PARTICLE_NUM 3 
 #define TARGET_FRAME_TIME 60
 
 int game_is_running = FALSE;
@@ -28,9 +28,9 @@ typedef struct partice {
     vector velocity;
     vector size;
     float mass;
-} particle;
+} Particle;
 
-particle particles[PARTICLE_NUM];
+Particle particles[PARTICLE_NUM];
 
 int initiliaze_window(void) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -77,8 +77,9 @@ void process_input() {
 
 void setup() {
     for(int i = 0; i < PARTICLE_NUM; i++) {
-        printf("cycle: %d", i);
-        particles[i].position = (vector) {20, 20};
+        // printf("cycle: %d", i);
+        particles[i].position = (vector) {20 + i * 10, 20 + i * 10};
+        printf("x: %f", particles[i].position.x);
         particles[i].size = (vector) {20, 20};
     }
 }
@@ -95,18 +96,27 @@ void render() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    // draw rectangle
-    SDL_Rect particle_rect = {
-        particles[PARTICLE_NUM-1].position.x,
-        particles[PARTICLE_NUM-1].position.y,
-        particles[PARTICLE_NUM-1].size.x,
-        particles[PARTICLE_NUM-1].size.y
-    };
-    
 
     // render
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, &particle_rect);
+    
+    for(int i = 0; i < PARTICLE_NUM; i++) { 
+        // create a pointer of type Particle (struct) called particle and assign it the memory address of particles[i]
+        // we need a pointer so that variable is continuos 
+        Particle* particle = &particles[i];
+
+        // draw rectangle
+        SDL_Rect particle_rect = {
+                particle->position.x,   // -> is the same as . (eg particle.position) but for pointers 
+                particle->position.y,
+                particle->size.x,
+                particle->size.y
+        };
+
+        printf("pos: %i", particle_rect.x);
+
+        SDL_RenderFillRect(renderer, &particle_rect);
+    };
     
     // must swap buffer as sdl uses double buffering
     SDL_RenderPresent(renderer);
