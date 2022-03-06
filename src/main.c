@@ -8,7 +8,7 @@
 #define HEIGHT 800
 
 #define PARTICLE_NUM 1 
-#define TARGET_FRAME_TIME 30
+#define TARGET_FRAME_TIME 60
 
 int game_is_running = FALSE;
 int last_frame_time;
